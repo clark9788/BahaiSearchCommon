@@ -1,0 +1,21 @@
+{
+  "permissions": {
+    "allow": [
+      "PowerShell(Get-ChildItem -Path \"D:\\\\AI-Python\\\\BahaiResearchA\" -Force | ForEach-Object { $_.Name })",
+      "Bash(Get-ChildItem -Recurse -Force)",
+      "Bash(Select-Object FullName)",
+      "Bash(Sort-Object FullName)",
+      "Bash(mvn test *)",
+      "Bash(mvn package *)",
+      "Bash(mkdir -p \"D:/AI-Python/BahaiResearchA/app/libs\")",
+      "Bash(cp \"D:/AI-Python/BahaiSearchCommon/target/bahai-search-common-1.0.0.jar\" \"D:/AI-Python/BahaiResearchA/app/libs/\")",
+      "Read(//d/AI-Python/BahaiResearchA/**)",
+      "Bash(./gradlew assembleDebug)",
+      "Bash(mvn install *)",
+      "Read(//d/AI-Python/BahaiResearch/**)",
+      "Bash(mvn compile *)",
+      "Bash(echo \"EXIT:$?\")",
+      "Bash(mvn clean *)"
+    ]
+  }
+}
