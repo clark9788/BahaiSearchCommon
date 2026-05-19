@@ -15,7 +15,8 @@
       "Read(//d/AI-Python/BahaiResearch/**)",
       "Bash(mvn compile *)",
       "Bash(echo \"EXIT:$?\")",
-      "Bash(mvn clean *)"
+      "Bash(mvn clean *)",
+      "PowerShell(New-Item *)"
     ]
   }
 }
