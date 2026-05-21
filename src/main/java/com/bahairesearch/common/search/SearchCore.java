@@ -59,8 +59,10 @@ public final class SearchCore {
         if (tokenCount < 2 || tokenCount > 3) return "";
         if (tokenCount == 3) {
             // 3rd token placed outside NEAR so it is required (AND) rather than proximity-bound
-            return "NEAR(" + tokens.get(0) + " " + tokens.get(1) + ", " + NEAR_DISTANCE + ")"
-                    + " AND " + tokens.get(2);
+           // return "NEAR(" + tokens.get(0) + " " + tokens.get(1) + ", " + NEAR_DISTANCE + ")"
+            //        + " AND " + tokens.get(2);
+            // Changed back to using 3 NEAR tokens
+            return "NEAR(" + tokens.get(0) + " " + tokens.get(1) + " " + tokens.get(2) + ", " + NEAR_DISTANCE + ")";
         }
         return "NEAR(" + tokens.get(0) + " " + tokens.get(1) + ", " + NEAR_DISTANCE + ")";
     }
@@ -246,12 +248,14 @@ public final class SearchCore {
      */
     public static boolean containsAnyContentTerm(String quote, List<String> contentTerms) {
         String normalizedQuote = normalizeForMatch(quote);
-        Set<String> quoteTokens = new HashSet<>();
+        List<String> quoteTokens = new ArrayList<>();
         for (String token : normalizedQuote.split("\\s+")) {
             if (!token.isEmpty()) quoteTokens.add(token);
         }
         for (String term : contentTerms) {
-            if (quoteTokens.contains(term)) return true;
+            for (String token : quoteTokens) {
+                if (token.startsWith(term)) return true;
+            }
         }
         return false;
     }

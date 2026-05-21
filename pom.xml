@@ -6,7 +6,7 @@
 
     <groupId>com.bahairesearch</groupId>
     <artifactId>bahai-search-common</artifactId>
-    <version>1.0.0</version>
+    <version>1.1.0</version>
     <packaging>jar</packaging>
     <name>BahaiSearchCommon</name>
     <description>Shared library extracted from BahaiResearch (Windows) and BahaiResearchA (Android)</description>

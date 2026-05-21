@@ -196,7 +196,8 @@ class SearchCoreTest {
     @Test
     void toFtsQueryNear_threeTokens_thirdOutsideNear() {
         // 3rd token is AND'd outside the NEAR clause so it is required but not proximity-bound
-        assertEquals("NEAR(unity* light*, 15) AND peace*",
+        // 3rd token now same as 2 token
+        assertEquals("NEAR(unity* light* peace*, 15)",
                 SearchCore.toFtsQueryNear("unity light peace", null));
     }
 
@@ -558,11 +559,11 @@ class SearchCoreTest {
     }
 
     @Test
-    void filterByContentTerms_wordBoundaryNotSubstring() {
-        // "unit" should NOT match a passage that only contains "unity"
+    void filterByContentTerms_prefixMatchesInflectedForm() {
+        // "unit" prefix matches "unity" — consistent with FTS5 wildcard behaviour
         CorpusSearchHit h = hit("The unity of mankind is the great theme.", -1.0);
         List<CorpusSearchHit> result = SearchCore.filterByContentTerms(List.of(h), List.of("unit"));
-        assertTrue(result.isEmpty());
+        assertFalse(result.isEmpty());
     }
 
     // -------------------------------------------------------------------------
@@ -642,9 +643,15 @@ class SearchCoreTest {
     }
 
     @Test
-    void containsAnyContentTerm_substringOnly_false() {
-        // "unit" is not a whole token in "unity"
-        assertFalse(SearchCore.containsAnyContentTerm("The unity of mankind.", List.of("unit")));
+    void containsAnyContentTerm_prefixMatch_true() {
+        // "unit" is a prefix of "unity" — consistent with FTS5 wildcard behaviour
+        assertTrue(SearchCore.containsAnyContentTerm("The unity of mankind.", List.of("unit")));
+    }
+
+    @Test
+    void containsAnyContentTerm_singularMatchesPlural_true() {
+        // "windflower" query must find passages containing "windflowers"
+        assertTrue(SearchCore.containsAnyContentTerm("Regard the windflowers of the garden.", List.of("windflower")));
     }
 
     @Test
