@@ -43,6 +43,14 @@ public final class SearchCore {
     public static final Set<String> GENERIC_QUERY_TOKENS = Collections.unmodifiableSet(new HashSet<>(Arrays.asList(
             "book", "books", "most", "issue", "issues")));
 
+    /**
+     * Words that occur in an author's name but are also ordinary search terms. Stripping them
+     * from the query would gut it: with "Universal House of Justice" selected, a search for
+     * "justice" or "house of worship" must still search for those words.
+     */
+    public static final Set<String> GENERIC_AUTHOR_TOKENS = Collections.unmodifiableSet(new HashSet<>(Arrays.asList(
+            "of", "the", "and", "universal", "house", "justice", "cause", "god")));
+
     private SearchCore() {}
 
     // -------------------------------------------------------------------------
@@ -105,6 +113,14 @@ public final class SearchCore {
                 tokens.add(token + "*");
             }
         }
+        if (tokens.isEmpty() && !authorTokens.isEmpty()) {
+            // The topic consisted only of author-name words; search for them rather than nothing.
+            for (String token : normalizeForMatch(topic).split("\\s+")) {
+                if (token.length() >= 3 && !NOISE_TOKENS.contains(token)) {
+                    tokens.add(token + "*");
+                }
+            }
+        }
         return new ArrayList<>(new LinkedHashSet<>(tokens));
     }
 
@@ -140,12 +156,15 @@ public final class SearchCore {
 
     /**
      * Builds a set of author name tokens to exclude from query token extraction.
+     * Ordinary words that happen to appear in an author's name (see GENERIC_AUTHOR_TOKENS)
+     * are never excluded, so filtering by "Universal House of Justice" does not stop the
+     * words "justice" or "house" from being searched.
      */
     public static Set<String> buildAuthorTokenSet(String resolvedAuthor) {
         if (isEmpty(resolvedAuthor)) return Collections.emptySet();
         Set<String> tokens = new HashSet<>();
         for (String token : normalizeForMatch(resolvedAuthor).split("\\s+")) {
-            if (!token.isEmpty()) tokens.add(token);
+            if (!token.isEmpty() && !GENERIC_AUTHOR_TOKENS.contains(token)) tokens.add(token);
         }
         return tokens;
     }
@@ -160,12 +179,7 @@ public final class SearchCore {
     public static List<String> extractContentTerms(String topic, String requiredAuthor) {
         String normalizedTopic = normalizeForMatch(topic);
         if (normalizedTopic.isEmpty()) return Collections.emptyList();
-        Set<String> authorTerms = new HashSet<>();
-        if (!isEmpty(requiredAuthor)) {
-            for (String token : normalizeForMatch(requiredAuthor).split("\\s+")) {
-                if (!token.isEmpty()) authorTerms.add(token);
-            }
-        }
+        Set<String> authorTerms = buildAuthorTokenSet(requiredAuthor);
         List<String> terms = new ArrayList<>();
         for (String token : normalizedTopic.split("\\s+")) {
             if (token.length() < 3) continue;

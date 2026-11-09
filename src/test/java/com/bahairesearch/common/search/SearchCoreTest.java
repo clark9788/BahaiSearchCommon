@@ -140,6 +140,28 @@ class SearchCoreTest {
     }
 
     @Test
+    void extractFtsTokens_keepsOrdinaryWordsInAuthorName() {
+        // "justice" appears in the author's name but is an ordinary search term
+        assertEquals(List.of("justice*", "mercy*"),
+                SearchCore.extractFtsTokens("justice mercy", "Universal House of Justice"));
+        assertEquals(List.of("house*", "worship*"),
+                SearchCore.extractFtsTokens("house of worship", "Universal House of Justice"));
+    }
+
+    @Test
+    void extractFtsTokens_topicOfOnlyAuthorWordsStillSearches() {
+        // Would otherwise strip to nothing and return "No Results"
+        assertEquals(List.of("justice*"),
+                SearchCore.extractFtsTokens("justice", "Universal House of Justice"));
+    }
+
+    @Test
+    void buildAuthorTokenSet_ignoresGenericAuthorWords() {
+        assertEquals(Set.of(), SearchCore.buildAuthorTokenSet("Universal House of Justice"));
+        assertEquals(Set.of("baha", "u", "llah"), SearchCore.buildAuthorTokenSet("Baha'u'llah"));
+    }
+
+    @Test
     void extractFtsTokens_normalizesAccents() {
         // "Bahá'u'lláh" normalizes the same as "baha u llah" so should resolve to author tokens
         List<String> tokens = SearchCore.extractFtsTokens("unity peace", null);
