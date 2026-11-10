@@ -492,6 +492,20 @@ class SearchCoreTest {
         assertSame(better, ranked.get(0));
     }
 
+    @Test
+    void rankForDisplay_bookScopedHitsSortAfterRealHits() {
+        // Book-scoped fallback hits carry a positive sentinel, so they cannot enter the
+        // phrase tier or outrank a real BM25 match.
+        CorpusSearchHit bookScoped = hit(longCleanPassage(), 99998.0);
+        CorpusSearchHit phrase     = hit(longCleanPassage() + " phrase", -99999.0);
+        CorpusSearchHit regular    = hit(longCleanPassage() + " regular", -1.0);
+        List<CorpusSearchHit> ranked =
+                SearchCore.rankForDisplay(List.of(bookScoped, regular, phrase));
+        assertSame(phrase, ranked.get(0));
+        assertSame(regular, ranked.get(1));
+        assertSame(bookScoped, ranked.get(2));
+    }
+
     // -------------------------------------------------------------------------
     // applyNearBoost
     // -------------------------------------------------------------------------
